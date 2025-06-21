@@ -11,6 +11,7 @@ intents.guilds = True
 intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+member = await interaction.guild.fetch_member(interaction.user.id)
 tree = bot.tree
 
 # Roles permitidos para los comandos restringidos
@@ -28,7 +29,11 @@ async def on_ready():
 @tree.command(name="alta", description="Dar de alta un local")
 @app_commands.describe(nombre="Nombre del local")
 async def alta(interaction: discord.Interaction, nombre: str):
-    if not tiene_roles_permitidos(interaction.user, ROLES_PERMITIDOS):
+    member = await interaction.guild.fetch_member(interaction.user.id)
+if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
+    return
+
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     alta_local(nombre)
