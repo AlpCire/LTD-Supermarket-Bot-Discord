@@ -23,7 +23,13 @@ async def get_member(interaction: discord.Interaction):
     if isinstance(interaction.user, discord.Member):
         return interaction.user
     if interaction.guild:
-        return interaction.guild.get_member(interaction.user.id)
+        member = interaction.guild.get_member(interaction.user.id)
+        if member:
+            return member
+        try:
+            return await interaction.guild.fetch_member(interaction.user.id)
+        except discord.NotFound:
+            return None
     return None
 
 @bot.event
