@@ -14,10 +14,13 @@ intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 tree = bot.tree
 
-ROLES_PERMITIDOS = {"Cajero", "Reponedor", "Gerente", "Gerente General", "Supervisor"}
+ROLES_PERMITIDOS_IDS = {
+    1386101305197592746,  # Gerente General
+    # Puedes agregar más IDs aquí si lo deseas
+}
 
-def tiene_roles_permitidos(member: discord.Member, permitidos: set):
-    return any(role.name in permitidos for role in member.roles)
+def tiene_roles_permitidos(member: discord.Member, permitidos_ids: set):
+    return any(role.id in permitidos_ids for role in member.roles)
 
 async def get_member(interaction: discord.Interaction):
     if isinstance(interaction.user, discord.Member):
@@ -42,7 +45,7 @@ async def on_ready():
 @app_commands.describe(nombre="Nombre del local")
 async def alta(interaction: discord.Interaction, nombre: str):
     member = await get_member(interaction)
-    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS_IDS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     alta_local(nombre)
@@ -52,7 +55,7 @@ async def alta(interaction: discord.Interaction, nombre: str):
 @app_commands.describe(nombre="Nombre del local")
 async def membresia(interaction: discord.Interaction, nombre: str):
     member = await get_member(interaction)
-    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS_IDS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     dar_membresia(nombre)
@@ -62,7 +65,7 @@ async def membresia(interaction: discord.Interaction, nombre: str):
 @app_commands.describe(nombre="Nombre del local", monto="Monto total de la compra en USD")
 async def compra(interaction: discord.Interaction, nombre: str, monto: float):
     member = await get_member(interaction)
-    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS_IDS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     if monto < 10000:
