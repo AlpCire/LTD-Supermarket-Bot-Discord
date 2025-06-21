@@ -9,12 +9,11 @@ TOKEN = os.getenv("DISCORD_TOKEN")
 intents = discord.Intents.default()
 intents.guilds = True
 intents.members = True
+intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-member = await interaction.guild.fetch_member(interaction.user.id)
 tree = bot.tree
 
-# Roles permitidos para los comandos restringidos
 ROLES_PERMITIDOS = {"Cajero", "Reponedor", "Gerente", "Gerente General", "Supervisor"}
 
 def tiene_roles_permitidos(member: discord.Member, permitidos: set):
@@ -30,10 +29,7 @@ async def on_ready():
 @app_commands.describe(nombre="Nombre del local")
 async def alta(interaction: discord.Interaction, nombre: str):
     member = await interaction.guild.fetch_member(interaction.user.id)
-if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
-    await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
-    return
-
+    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     alta_local(nombre)
@@ -42,7 +38,8 @@ if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
 @tree.command(name="membresia", description="Dar membresía a un local")
 @app_commands.describe(nombre="Nombre del local")
 async def membresia(interaction: discord.Interaction, nombre: str):
-    if not tiene_roles_permitidos(interaction.user, ROLES_PERMITIDOS):
+    member = await interaction.guild.fetch_member(interaction.user.id)
+    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     dar_membresia(nombre)
@@ -51,7 +48,8 @@ async def membresia(interaction: discord.Interaction, nombre: str):
 @tree.command(name="compra", description="Agregar compra si monto > $10,000")
 @app_commands.describe(nombre="Nombre del local", monto="Monto total de la compra en USD")
 async def compra(interaction: discord.Interaction, nombre: str, monto: float):
-    if not tiene_roles_permitidos(interaction.user, ROLES_PERMITIDOS):
+    member = await interaction.guild.fetch_member(interaction.user.id)
+    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     if monto < 10000:
@@ -67,11 +65,12 @@ async def compra(interaction: discord.Interaction, nombre: str, monto: float):
 @tree.command(name="premio", description="Ver cuántas compras tiene un local")
 @app_commands.describe(nombre="Nombre del local")
 async def premio(interaction: discord.Interaction, nombre: str):
-    # permitir todos los roles excepto @everyone (sin roles)
-    if len(interaction.user.roles) <= 1:
+    member = await interaction.guild.fetch_member(interaction.user.id)
+    if len(member.roles) <= 1:
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     total = obtener_compras(nombre)
     await interaction.response.send_message(f"📊 El local '{nombre}' tiene {total} compras registradas.")
 
 bot.run(TOKEN)
+
