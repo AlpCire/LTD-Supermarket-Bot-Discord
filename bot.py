@@ -28,8 +28,8 @@ async def on_ready():
 @tree.command(name="alta", description="Dar de alta un local")
 @app_commands.describe(nombre="Nombre del local")
 async def alta(interaction: discord.Interaction, nombre: str):
-    member = await interaction.guild.fetch_member(interaction.user.id)
-    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    member = interaction.user if isinstance(interaction.user, discord.Member) else None
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     alta_local(nombre)
@@ -38,8 +38,8 @@ async def alta(interaction: discord.Interaction, nombre: str):
 @tree.command(name="membresia", description="Dar membresía a un local")
 @app_commands.describe(nombre="Nombre del local")
 async def membresia(interaction: discord.Interaction, nombre: str):
-    member = await interaction.guild.fetch_member(interaction.user.id)
-    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    member = interaction.user if isinstance(interaction.user, discord.Member) else None
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     dar_membresia(nombre)
@@ -48,8 +48,8 @@ async def membresia(interaction: discord.Interaction, nombre: str):
 @tree.command(name="compra", description="Agregar compra si monto > $10,000")
 @app_commands.describe(nombre="Nombre del local", monto="Monto total de la compra en USD")
 async def compra(interaction: discord.Interaction, nombre: str, monto: float):
-    member = await interaction.guild.fetch_member(interaction.user.id)
-    if not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
+    member = interaction.user if isinstance(interaction.user, discord.Member) else None
+    if member is None or not tiene_roles_permitidos(member, ROLES_PERMITIDOS):
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     if monto < 10000:
@@ -65,12 +65,11 @@ async def compra(interaction: discord.Interaction, nombre: str, monto: float):
 @tree.command(name="premio", description="Ver cuántas compras tiene un local")
 @app_commands.describe(nombre="Nombre del local")
 async def premio(interaction: discord.Interaction, nombre: str):
-    member = await interaction.guild.fetch_member(interaction.user.id)
-    if len(member.roles) <= 1:
+    member = interaction.user if isinstance(interaction.user, discord.Member) else None
+    if member is None or len(member.roles) <= 1:
         await interaction.response.send_message("⛔ No tienes permiso para usar este comando.", ephemeral=True)
         return
     total = obtener_compras(nombre)
     await interaction.response.send_message(f"📊 El local '{nombre}' tiene {total} compras registradas.")
 
 bot.run(TOKEN)
-
